@@ -1,0 +1,76 @@
+<div class="todo-container">
+  <h2>Mis tareas</h2>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nueva tarea</mat-label>
+    <input matInput [(ngModel)]="newTask" placeholder="Escribe una tarea..." />
+  </mat-form-field>
+
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="addTask()"
+    [disabled]="!newTask.trim()"
+  >
+    Agregar
+  </button>
+
+  <div class="filters">
+    <button mat-button (click)="filter = 'all'" [color]="filter === 'all' ? 'primary' : undefined">Todas</button>
+    <button mat-button (click)="filter = 'completed'" [color]="filter === 'completed' ? 'primary' : undefined">Completadas</button>
+    <button mat-button (click)="filter = 'pending'" [color]="filter === 'pending' ? 'primary' : undefined">Pendientes</button>
+  </div>
+
+  @if (filteredTasks().length > 0) {
+    <ul>
+      @for (task of filteredTasks(); track task; let i = $index) {
+        <li class="task-item" [class.completed]="task.completed">
+          <mat-checkbox
+            [(ngModel)]="task.completed"
+            (change)="completeTask(i)"
+            [disabled]="task.completed"
+          ></mat-checkbox>
+
+          @if (!task.editing) {
+            <span
+              (dblclick)="!task.completed && editTask(task)"
+              [class.disabled]="task.completed"
+            >
+              {{ task.text }}
+            </span>
+          } @else {
+            <input
+              #editInput
+              data-focus="true"
+              [(ngModel)]="task.text"
+              (blur)="saveEdit(task, task.text)"
+              (keydown.enter)="saveEdit(task, task.text)"
+              (keydown.escape)="cancelEdit(task)"
+              [disabled]="task.completed"
+            />
+          }
+
+          @if (!task.completed) {
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="removeTask(i)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          } @else {
+            <button
+              mat-icon-button
+              color="accent"
+              (click)="unlockTask(i)"
+            >
+              <mat-icon>lock_open</mat-icon>
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>No hay tareas aún.</p>
+  }
+</div>
